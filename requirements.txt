@@ -1,0 +1,5 @@
+discord.py>=2.4.0
+# 公式リリースはXの仕様変更(ondemand.s.js構造変更)で "Couldn't get KEY_BYTE indices" エラーが発生し
+# ログインできないため、修正済みのフォーク(未マージPR https://github.com/d60/twikit/pull/410 )を使用する
+git+https://github.com/pothitos/twikit.git@patch-1#egg=twikit
+python-dotenv>=1.0.1

@@ -1,0 +1,10 @@
+.env
+cookies.json
+*.log
+__pycache__/
+*.pyc
+.venv/
+venv/
+トークン.txt
+*.token
+*.key
