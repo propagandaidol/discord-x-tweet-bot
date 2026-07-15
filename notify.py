@@ -33,14 +33,22 @@ def build_message(tweet, target_username: str) -> str:
     return f"{text}{footer}"
 
 
-async def post_to_discord(client: httpx.AsyncClient, token: str, channel_id: int, content: str) -> None:
-    resp = await client.post(
-        f"{DISCORD_API}/channels/{channel_id}/messages",
-        headers={"Authorization": f"Bot {token}"},
-        json={"content": content},
-        timeout=15,
-    )
-    resp.raise_for_status()
+async def post_to_discord(
+    client: httpx.AsyncClient, token: str, channel_id: int, content: str, max_retries: int = 5
+) -> None:
+    for attempt in range(max_retries + 1):
+        resp = await client.post(
+            f"{DISCORD_API}/channels/{channel_id}/messages",
+            headers={"Authorization": f"Bot {token}"},
+            json={"content": content},
+            timeout=15,
+        )
+        if resp.status_code == 429 and attempt < max_retries:
+            retry_after = resp.json().get("retry_after", 1)
+            await asyncio.sleep(float(retry_after) + 0.5)
+            continue
+        resp.raise_for_status()
+        return
 
 
 async def main() -> None:
@@ -75,6 +83,9 @@ async def main() -> None:
                     print(f"posted to channel {channel_id}: tweet {tweet.id}")
                 except Exception as e:
                     print(f"failed to post to channel {channel_id}: {e}")
+                # Discordのレート制限(だいたい5リクエスト/5秒/チャンネル)に
+                # 引っかからないよう、連投の間に少し間隔を空ける
+                await asyncio.sleep(1)
             state.set_last_tweet_id(target_username, tweet.id)
 
 
