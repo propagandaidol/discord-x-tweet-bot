@@ -68,7 +68,13 @@ async def main() -> None:
 
     state = StateStore(BASE_DIR / "state.json")
     last_id = state.get_last_tweet_id(target_username)
-    new_tweets = await fetcher.fetch_new_original_tweets(target_username, last_id)
+    try:
+        new_tweets = await fetcher.fetch_new_original_tweets(target_username, last_id)
+    except Exception as e:
+        # X側の一時的なエラー(レート制限やCloudflareのブロック等)でここが
+        # 落ちることがあるため、ワークフロー自体は失敗させず次回に委ねる
+        print(f"ツイート取得中にエラーが発生しました。次回の実行まで待機します: {e}")
+        return
 
     if not new_tweets:
         print("新しいツイートはありません")
