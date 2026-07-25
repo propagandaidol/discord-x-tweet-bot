@@ -1,8 +1,9 @@
 name: Check and notify new tweets
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
+  # GitHub純正のscheduleトリガーは実行間隔が大きくブレるため使用せず、
+  # 外部のcron-job.orgから5分おきにworkflow_dispatch APIを叩いてもらう方式に一本化している。
+  # scheduleとworkflow_dispatchを併用すると二重起動でconcurrencyが衝突するため要注意。
   workflow_dispatch: {}
 
 permissions:
