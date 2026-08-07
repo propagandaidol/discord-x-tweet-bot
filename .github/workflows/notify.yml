@@ -11,11 +11,16 @@ permissions:
 
 concurrency:
   group: notify
-  cancel-in-progress: false
+  # Xのハングなどで前回の実行が詰まっていても、新しいトリガーが来たら
+  # 古い方を打ち切って最新の1回だけを動かす(キューが際限なく溜まるのを防ぐ)
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    # X側の応答が返らずハングするケースがあるため、次のトリガー(5分後)より
+    # 十分短い時間で強制終了させる
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
 
