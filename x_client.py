@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import twikit_transaction_patch  # noqa: F401  (import時にtwikitへパッチを適用する)
 from twikit import Client, Tweet
 from twikit import user as twikit_user
 
